@@ -129,6 +129,7 @@ h3 {
   margin-right: auto;
   width: 50%;
 }
+/*mobile*/
 @media only screen and (max-width: 767px) {
   .heading-container .logo-container {
     text-align: center;
@@ -145,6 +146,10 @@ h3 {
   }
   .tagline {
     font-size: 14px;
+  }
+  body {
+    background-color: '#03031A';
+    background-image: none;
   }
 }
 
