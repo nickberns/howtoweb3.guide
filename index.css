@@ -160,7 +160,8 @@ h3 {
     margin-left: 5%;
   }
   .logo {
-    width: 90%;
+    min-width: 80% !important;
+    width: 90% !important;
   }
 }
 
