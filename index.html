@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+  <h ead>
+  <meta charset="utf-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>The Ultimate List of Web3 Resources | howtoweb3.guide</title>
+
+  <meta name="description" content="A collection of resources to get you started programming NFT's, Dapps & all things Web3." />
+
+  <meta property="og:image" content="IMAGE URL">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">  
+
+  <meta name="twitter:title" content="A collection of resources to get you started programming NFT's, Dapps & all things Web3." />
+
+  <meta name="Robots" content="index,follow" />
+	  	  
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-217805567-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-217805567-1');
+
+
+</script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="./index.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Overpass+Mono:300,400,600,700&amp;subset=latin-ext" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+P+One&display=swap" rel="stylesheet"> 
+
+   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->	  
+	  
+<script>
+
+const star = [];
+const star_x = [];
+const star_y = [];
+const star_remaining_ticks = [];
+const tiny = [];
+const tiny_x = [];
+const tiny_y = [];
+const tiny_remaining_ticks = [];
+const sparkles = 10; // total number of stars, same as number of dots
+const sparkle_lifetime = 30; // each star lives for twice this, then turns into a dot that also lives twice this
+const sparkle_distance = 30; // pixels
+
+// need to cache this because checking document size is slow
+let doc_height;
+let doc_width;
+let sparkles_enabled = null;
+
+// runs AFTER document.addEventListener("DOMContentLoaded", function () {...});
+window.onload = function () {
+
+    // cache doc size
+    doc_height = document.documentElement.scrollHeight;
+    doc_width = document.documentElement.scrollWidth;
+
+    // start animation loop
+    animate_sparkles();
+    if (sparkles_enabled === null) {
+        sparkle(true);
+    }
+};
+
+// start / stop / toggle the sparkles
+function sparkle(enable = null) {
+    if (enable === null) {
+        sparkles_enabled = !sparkles_enabled;
+    } else {
+        sparkles_enabled = !!enable;
+    }
+
+    if (sparkles_enabled && star.length < sparkles) {
+        sparkle_init();
+    }
+}
+
+
+// initialize but only if called
+function sparkle_destroy() {
+
+    let elem;
+    while (tiny.length) {
+        elem = tiny.pop();
+        if (elem) {
+            document.body.removeChild(elem);
+        }
+    }
+
+    while (star.length) {
+        elem = star.pop();
+        if (elem) {
+            document.body.removeChild(elem);
+        }
+    }
+}
+
+
+// initialize but only if called
+function sparkle_init() {
+
+    // to create one div per star / dot
+    function create_div(height, width) {
+        const div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.height = height + "px";
+        div.style.width = width + "px";
+        div.style.overflow = "hidden";
+        return (div);
+    }
+
+    // create stars and dots
+    for (let i = 0; i < sparkles; i++) {
+
+        // create div for dot
+        const tiny_div = create_div(3, 3);
+        tiny_div.style.visibility = "hidden";
+        tiny_div.style.zIndex = "999";
+
+        // if there's an existing dot, remove it
+        if (tiny[i]) {
+            document.body.removeChild(tiny[i])
+        }
+
+        // append new dot to document
+        document.body.appendChild(tiny_div);
+        tiny[i] = tiny_div;
+        tiny_remaining_ticks[i] = null;
+
+        // create div for star
+        const star_div = create_div(5, 5);
+        star_div.style.backgroundColor = "transparent";
+        star_div.style.visibility = "hidden";
+        star_div.style.zIndex = "999";
+
+        // create the actual star using two more divs
+        const bar_horiz = create_div(1, 5);
+        const bar_vert = create_div(5, 1);
+        star_div.appendChild(bar_horiz);
+        star_div.appendChild(bar_vert);
+        bar_horiz.style.top = "2px";
+        bar_horiz.style.left = "0px";
+        bar_vert.style.top = "0px";
+        bar_vert.style.left = "2px";
+
+        // if there's an existing star, remove it
+        if (star[i]) {
+            document.body.removeChild(star[i])
+        }
+
+        // append new star to document
+        document.body.appendChild(star_div);
+        star[i] = star_div;
+        star_remaining_ticks[i] = null;
+    }
+
+    // handle resize
+    window.addEventListener('resize', function () {
+
+        // clear everything because I don't want to bother checking which will be out-of-bounds
+        for (let i = 0; i < sparkles; i++) {
+            // clear all stars
+            star_remaining_ticks[i] = null;
+            star[i].style.left = "0px";
+            star[i].style.top = "0px";
+            star[i].style.visibility = "hidden";
+
+            // clear all dots
+            tiny_remaining_ticks[i] = null;
+            tiny[i].style.top = '0px';
+            tiny[i].style.left = '0px';
+            tiny[i].style.visibility = "hidden";
+        }
+
+        // reset cached height last
+        doc_height = document.documentElement.scrollHeight;
+        doc_width = document.documentElement.scrollWidth;
+    });
+
+    // when the mouse is moved, create stars where the pointer is and where the pointer PROBABLY was
+    document.onmousemove = function (e) {
+        if (sparkles_enabled && !e.buttons) {  // allow more sparkles the faster the mouse moves
+
+            const distance = Math.sqrt(Math.pow(e.movementX, 2) + Math.pow(e.movementY, 2));
+            const delta_x = e.movementX * sparkle_distance * 2 / distance;
+            const delta_y = e.movementY * sparkle_distance * 2 / distance;
+            const probability = distance / sparkle_distance;
+            let cumulative_x = 0;
+
+            // where to make the star: where the moise pointer is for now
+            let mouse_y = e.pageY;
+            let mouse_x = e.pageX;
+
+            // create a star and move back until we reach where the mouse was before
+            while (Math.abs(cumulative_x) < Math.abs(e.movementX)) {
+                create_star(mouse_x, mouse_y, probability);
+
+                let delta = Math.random();
+                mouse_x -= delta_x * delta;
+                mouse_y -= delta_y * delta;
+                cumulative_x += delta_x * delta;
+            }
+        }
+    };
+}
+
+// animation loop
+function animate_sparkles(fps = 60) {
+    const interval_milliseconds = 1000 / fps;
+
+    let alive = 0;
+
+    for (let i = 0; i < star.length; i++) {
+        alive += update_star(i);
+    }
+
+    for (let i = 0; i < tiny.length; i++) {
+        alive += update_tiny(i);
+    }
+
+    if (alive === 0 && !sparkles_enabled) {
+        sparkle_destroy();
+    }
+
+    setTimeout("animate_sparkles(" + fps + ")", interval_milliseconds);
+}
+
+// create a new star at some location
+function create_star(x, y, probability = 1.0) {
+
+    // don't create star if it's out of bounds
+    if (x + 5 >= doc_width || y + 5 >= doc_height) {
+        return;
+    }
+
+    // if it's probablistic, give it a chance to do nothing
+    if (Math.random() > probability) {
+        return;
+    }
+
+    // get a color (for the star)
+    function get_random_color() {
+
+        let c = [];
+        c[0] = 255;
+        c[1] = Math.floor(Math.random() * 256);
+        c[2] = Math.floor(Math.random() * (256 - c[1] / 2));
+        c.sort(function () {
+            return (0.5 - Math.random());
+        });
+        return ("rgb(" + c[0] + ", " + c[1] + ", " + c[2] + ")");
+    }
+
+    // which star index do we want to use (either a blank index, or the star closest to dying)
+    let min_lifetime = sparkle_lifetime * 2 + 1;
+    let min_index = NaN;
+    for (let i = 0; i < sparkles; i++) {
+        if (!star_remaining_ticks[i]) {
+            min_lifetime = null;
+            min_index = i;
+            break;
+        } else if (star_remaining_ticks[i] < min_lifetime) {
+            min_lifetime = star_remaining_ticks[i];
+            min_index = i;
+        }
+    }
+
+    // convert existing star to dot before we reuse it
+    if (min_lifetime) {
+        star_to_tiny(min_index);
+    }
+
+    // create a new star
+    if (min_index >= 0) {
+        star_remaining_ticks[min_index] = sparkle_lifetime * 2;
+        star_x[min_index] = x;
+        star[min_index].style.left = x + "px";
+        star_y[min_index] = y;
+        star[min_index].style.top = y + "px";
+        star[min_index].style.clip = "rect(0px, 5px, 5px, 0px)";
+        star[min_index].childNodes[0].style.backgroundColor =
+            star[min_index].childNodes[1].style.backgroundColor = get_random_color();
+        star[min_index].style.visibility = "visible";
+        return min_index
+    }
+
+}
+
+// update one star
+function update_star(i) {
+    // if star doesn't exist, exit early
+    if (star_remaining_ticks[i] === null) {
+        return false;
+    }
+
+    // tick the lifetime of the star
+    star_remaining_ticks[i] -= 1;
+
+    // star is dead?
+    if (star_remaining_ticks[i] === 0) {
+        star_to_tiny(i);
+        return false;
+    }
+
+    // star is only half-alive, shrink it
+    if (star_remaining_ticks[i] === sparkle_lifetime) {
+        star[i].style.clip = "rect(1px, 4px, 4px, 1px)"
+    }
+
+    // move the star
+    if (star_remaining_ticks[i] > 0) {
+        star_y[i] += 1 + 3 * Math.random();
+        star_x[i] += (i % 5 - 2) / 5;
+
+        // only move star if it's in-bounds, otherwise, kill it below
+        if (star_y[i] + 5 < doc_height && star_x[i] + 5 < doc_width) {
+            star[i].style.top = star_y[i] + "px";
+            star[i].style.left = star_x[i] + "px";
+            return true;
+        }
+    }
+
+    // kill the star
+    star_remaining_ticks[i] = null;
+    star[i].style.left = "0px";
+    star[i].style.top = "0px";
+    star[i].style.visibility = "hidden";
+    return false;
+}
+
+// convert star to dot
+function star_to_tiny(i) {
+    // star is dead
+    if (star_remaining_ticks[i] === null) {
+        return;
+    }
+
+    // star is in-bounds, create dot
+    if (star_y[i] + 3 < doc_height && star_x[i] + 3 < doc_width) {
+        tiny_remaining_ticks[i] = sparkle_lifetime * 2;
+        tiny_y[i] = star_y[i];
+        tiny[i].style.top = star_y[i] + "px";
+        tiny_x[i] = star_x[i];
+        tiny[i].style.left = star_x[i] + "px";
+        tiny[i].style.width = "2px";
+        tiny[i].style.height = "2px";
+        tiny[i].style.backgroundColor = star[i].childNodes[0].style.backgroundColor;
+        star[i].style.visibility = "hidden";
+        tiny[i].style.visibility = "visible";
+    }
+
+    // remove star
+    star_remaining_ticks[i] = null;
+    star[i].style.left = "0px";
+    star[i].style.top = "0px";
+    star[i].style.visibility = "hidden";
+}
+
+// update one dot
+function update_tiny(i) {
+    // dot is dead
+    if (tiny_remaining_ticks[i] === null) {
+        return false;
+    }
+
+    // tick dot lifetime
+    tiny_remaining_ticks[i] -= 1;
+
+    // dot is half-dead, shrink it
+    if (tiny_remaining_ticks[i] === sparkle_lifetime) {
+        tiny[i].style.width = "1px";
+        tiny[i].style.height = "1px";
+    }
+
+    // move the dot
+    if (tiny_remaining_ticks[i] > 0) {
+        tiny_y[i] += 1 + 2 * Math.random();
+        tiny_x[i] += (i % 4 - 2) / 4;
+
+        // only allow move if dot is still in-bounds, else kill the dot (below)
+        if (tiny_y[i] + 3 < doc_height && tiny_x[i] + 3 < doc_width) {
+            tiny[i].style.top = tiny_y[i] + "px";
+            tiny[i].style.left = tiny_x[i] + "px";
+            return true
+        }
+    }
+
+    // dot is dead
+    tiny_remaining_ticks[i] = null;
+    tiny[i].style.top = '0px';
+    tiny[i].style.left = '0px';
+    tiny[i].style.visibility = "hidden";
+    return false
+}
+
+	
+</script>
+  
+	  
+ 
+	  
+
+	  
+	  
+	  
+<style>
+  .hero { max-height: 200px;
+  padding-top: 0px;
+  margin-top: 0px;
+
+  }
+  .invert{
+    color: #fff;
+  background-color: #000;
+  }
+  .img1 {
+		padding: 10px 10px 50px 10px;
+  }
+  *{
+  font-family: "Overpass mono", monospace;
+  }
+  /*h2 {
+	color: #497699;
+  }*/
+  
+ 
+ .bottom{
+ background-color: black;
+ color: white;
+ overflow: hidden;
+ }
+  .bottom a{
+ color: #ba26ce;;
+ }
+
+  </style>
+</h>
+<body>
+
+<div class="heading-container">
+  <div class="row">
+	
+    <div class="col-sm-12 col-md-12 logo-container">
+		<img class="logo" src="web3logo2.png">
+	<div class="tagline" style="color:white; font-size:18px;">A collection of resources for hackers <span style="font-size:25px;">🧙‍♂️</span></div>
+
+    </div>
+  </div>
+</div>
+
+<div >
+  <div class="container main" style="margin-top:30px; padding-bottom:20px;">
+  <div class="row">
+    <div class="col-sm-6 md-6">
+	     <h2>🎓 LEARN</h2>
+          <p><a name="start"></a></p>
+          <h3>Featured tutorials</h3>
+            <ul>
+              <li><a href="https://buildspace.so/"  data-toggle="tooltip" title="Community-based learning"  target="_blank">Buildspace</a> <span class="badge badge-success">⭐ start here</span></li>
+			  <li><a href="https://cryptozombies.io/"  data-toggle="tooltip" title="Learn by playing"  target="_blank">CryptoZombies</a> </li>
+        <li><a href="https://eth.build/"  data-toggle="tooltip" title="by ETH Build"  target="_blank">ETH.Build</a> </li>   
+      </ul>
+          <p><a name="buy"></a></p>
+          <h3>Beginner tutorials</h3>
+            <ul>
+        <li><a href="https://buildspace.so/" target="_blank">Buildspace tutorials</a></li>
+        <li><a href="https://www.youtube.com/watch?v=3681ZYbDSSk" target="_blank">How to build an Ethereum Dapp</a></li>
+        <li><a href="https://www.youtube.com/watch?v=KkZ6iYnSDRw" target="_blank">Build a Dapp in 20 mins</a></li>
+				<li><a href="https://github.com/scaffold-eth/scaffold-eth/tree/simple-nft-example" target="_blank">Simple NFT tutorial</a></li>
+				<li><a href="https://ethereum.org/en/developers/tutorials/hello-world-smart-contract/" target="_blank">Hello world smart contract</a></li> 
+				<li><a href="https://ethereum.org/en/developers/tutorials/send-token-etherjs/" target="_blank">Send token with ether.js</a></li> </ul>
+    <p><a name="account"></a></p>
+    <h3>Advanced tutorials</h3>
+      <ul>
+        <li><a href="https://solidity-by-example.org/"  data-toggle="tooltip" title=""  target="_blank">Solidity by example</a> </li>       
+        <li><a href="https://blog.openzeppelin.com/the-hitchhikers-guide-to-smart-contracts-in-ethereum-848f08001f05/"  data-toggle="tooltip" title="by OppenZeppelin"  target="_blank">Hitchhikers Guide</a> </li>
+        <li><a href="https://www.youtube.com/watch?v=EXas4uBqQr8"  data-toggle="tooltip" title=""  target="_blank">What is multicall</a> </li>
+        <li><a href="https://ethereum.org/en/developers/tutorials/testing-erc-20-tokens-with-waffle/"  data-toggle="tooltip" title=""  target="_blank">Taking ERC-20 tokens</a> </li>
+      </ul>
+          <p><a name="wallet"></a></p>
+          <h3>Learn by watching</h3>
+            <ul>
+        <li><a href="https://www.youtube.com/watch?v=KkZ6iYnSDRw" target="_blank">Build a Dapp in 20 mins</a></li>      
+				<li><a href="https://www.youtube.com/playlist?list=PLS5SEs8ZftgUNcUVXtn2KXiE1Ui9B5UrY" target="_blank">Dapp University</a></li>
+				<li><a href="https://www.youtube.com/playlist?list=PLFPZ8ai7J-iR4F882O2mBjqydynG9iDZS" target="_blank">Moralis Web3</a></li> 
+				   </ul>
+        <p><a name="wallet"></a></p>
+        <h3>Learn by gaming</h3>
+        <ul>
+          <li><a href="https://cryptozombies.io/"  data-toggle="tooltip" title="Learn by playing"  target="_blank">CryptoZombies</a> <span class="badge badge-dark">⭐ recommended</span></li>
+          <li><a href="https://ethernaut.openzeppelin.com/" target="_blank">Ethernauts</a></li> 
+          <li><a href="https://vyper.fun" target="_blank">Vyper</a></li>   
+          <li><a href="https://www.damnvulnerabledefi.xyz/" target="_blank">Damn vulnerable defi</a></li>   
+        </ul>
+    <p><a name="courses"></a></p>
+		<h3>Courses</h3>
+      <ul>
+				<li><a href="https://buildspace.so/" target="_blank">Buildspace</a> <span class="badge badge-dark">⭐ recommended</span></li>
+        <li><a href="https://nftschool.dev/" target="_blank">NFT school</a></li>
+        <li><a href="https://consensys.net/academy/bootcamp/" target="_blank">ConsenSys academy</a></li> 
+        <li><a href="https://www.chainshot.com/" target="_blank">ChainShot</a></li>
+        <li><a href="https://www.bloomtech.com/courses/web3" target="_blank">BloomTech</a></li>
+        <li><a href="https://www.coursera.org/specializations/blockchain" target="_blank">Coursera</a> <span class="badge badge-warning">🤓 advanced</span></li>
+      </ul>
+      <p><a name="official"></a></p>
+      <h3>Official resources</h3>
+      <ul>
+        <li><a href="https://ethereum.org/en/developers/docs/" target="_blank">Ethereum Docs</a> <span class="badge badge-secondary">✨ official </span></li>
+        <li><a href="https://ethereum.org/en/developers/tutorials/" target="_blank">Ethereum Tutorials</a> <span class="badge badge-secondary">✨ official </span></li> 
+      </ul>      
+          <h2 style="padding-top: 10px;">📺 Follow</h2>
+          <p><a name="read"></a></p>
+          <h3>Read</h3>
+             <ul>
+               <li><a href="https://vitalik.ca/" target="_blank">Vitaliks blog</a></li>
+               <li><a href="https://archive.balajis.com/" target="_blank">Balaji's blog</a> <span class="badge badge-dark">🤓 advanced</span></li>                  
+               <li><a href="https://blog.openzeppelin.com/" target="_blank">OpenZeppelin blog</a></li> 
+               <li><a href="https://unenumerated.blogspot.com" target="_blank">Nick Szabo's blog</a> <span class="badge badge-dark">🤓 advanced</span></li>                  
+               <li><a href="https://cdixon.org/" target="_blank">Chris Dixon's blog</a> </li>                  
+               <li><a href="https://ethresear.ch/" target="_blank">Eth Research</a> <span class="badge badge-dark">🤓 advanced</span></li>
+              </ul>
+            <p><a name="community"></a></p>
+            <h3>Community</h3>
+              <ul>
+                <li><a href="https://discord.com/invite/vPmqZqgpsS" target="_blank">Buildspace discord</a></li>
+                <li><a href="https://www.developerdao.com/" target="_blank">Developer DAO</a></li> 
+                <li><a href="https://www.reddit.com/r/ethdev/" target="_blank">r/ethdev</a></li> 
+                <li><a href="https://www.reddit.com/r/solidity/" target="_blank">r/solidity</a></li> 
+             </ul>
+    <h2>🎓 EXPLORE</h2>
+    <p><a name="marketplaces"></a></p> 
+    <h3>NFT marketplaces</h3>
+    <ul>
+				<li><a href="https://opensea.io/" target="_blank">OpenSea</a> </li>
+        <li><a href="https://rarible.com/" target="_blank">Rarible</a> </li>
+    </ul>
+    <p><a name="exchanges"></a></p> 
+    <h3>Exchanges</h3>
+    <ul>
+        <li><a href="https://localbitcoins.com/?ch=rray" target="_blank">Localbitcoins</a> (peer-to-peer)</li>
+        <li><a href="https://www.binance.com/?ref=10196621/" target="_blank">Binance</a> (btc to alt)</li>
+        <li><a href="https://uniswap.org/" target="_blank">Uniswap</a> (DEX)</li>
+    </ul> 
+ </div>
+ <div class="col-sm-6 md-6">
+  <h2>🛠️ BUILD</h2>
+  <p></a name="frameworks"></a></p>
+  <h3>Frameworks</h3>
+  <ul>
+    <li><a href="https://hardhat.org/" target="_blank">Hardhat</a> <span class="badge badge-dark">⭐ recommended</span></li>
+    <li><a href="https://www.truffleframework.com/" target="_blank">Truffle</a>  <span class="badge badge-dark">👍 easiest</span></li>
+    <li><a href="https://framework.embarklabs.io/" target="_blank">Embark</a></li>
+  </ul> 
+  <p><a name="libraries"></a></p>
+  	<h3>Smart contract libraries</h3>
+  	 <ul>
+        <li><a href="https://github.com/OpenZeppelin/openzeppelin-contracts" target="_blank">OpenZeppelin</a> <span class="badge badge-dark">⭐ recommended</span></li>
+        <li><a href="https://github.com/cryptofinlabs/cryptofin-solidity" target="_blank">Cryptofin</a></li>
+        <li><a href="https://github.com/Modular-Network/ethereum-libraries" target="_blank">Modular</a></li>
+    	</ul>
+  <p><a name="languages"></a></p>
+    <h3>Smart contract languages</h3>
+         <ul>
+          <li><a href="https://solidity.readthedocs.io/en/latest/" target="_blank">Solidity</a> <span class="badge badge-dark">⭐ recommended</span></li>
+          <li><a href="https://github.com/ethereum/vyper" target="_blank">Vyper</a></li>
+          <li><a href="https://github.com/pirapira/bamboo" target="_blank">Bamboo	</a></li>
+  </ul>
+  <p><a name="nodes"></a></p>
+  <h3>Cloud nodes</h3>
+  <ul>
+    <li><a href="https://infura.io/" target="_blank">Infura</a> <span class="badge badge-dark">⭐ recommended</span></li>
+    <li><a href="https://www.alchemy.com/" target="_blank">Alchemy</a></li>
+  </ul>
+  <p><a name="apis"></a></p>
+  <h3>APIs</h3>
+    <ul>
+      <li><a href="https://github.com/ethereum/web3.js/" target="_blank">Web3.js</a> <span class="badge badge-secondary">✨ official </span></li>
+      <li><a href="https://github.com/ethers-io/ethers.js/" target="_blank">Ethers.js</a></li>
+      <li><a href="https://github.com/ethjs" target="_blank">Eth.js</a></li>
+      <li><a href="https://github.com/ethereumjs/" target="_blank">Ethereumjs</a></li>
+    </ul>
+    <p><a name="apis"></a></p>
+    <h3>Eth clients</h3>
+      <ul>
+        <li><a href="https://github.com/ethereum/go-ethereum/wiki/geth" target="_blank">Geth</a> <span class="badge badge-secondary">✨ official </span></li>
+        <li><a href="https://github.com/ethereumjs/ethereumjs-client" target="_blank">Ethereumjs</a></li>
+        <li><a href="https://github.com/ether-camp/ethereum-harmony" target="_blank">Harmony</a></li>
+    </ul>
+  <p><a name="boilerplates"></a></p>
+   <h3>Boilerplates</h3>
+    <ul>
+      <li><a href="https://trufflesuite.com/boxes/" data-toggle="tooltip" title="by Truffle" target="_blank">Boxes</a> </li>
+      <li><a href="https://github.com/truffle-box/drizzle-box" data-toggle="tooltip" title="by Truffle" target="_blank">Drizzle</a> </li> 
+      <li><a href="https://github.com/NoahZinsmeister/web3-webpacked" target="_blank">Webpacked</a></li>
+      <li><a href="https://blog.replit.com/solidity Replit" target="_blank">Replit template</a></li> 
+      <li><a href="https://github.com/scaffold-eth/scaffold-eth" target="_blank">Scaffold Eth</a></li> 
+      <li><a href="https://github.com/paulrberg/create-eth-app" target="_blank">Create Eth app</a></li> 
+    </ul>
+	  <p><a name="testnets"></a></p>
+	<h3>Testnets</h3>
+		<ul>
+		  <li><a href="https://github.com/trufflesuite/ganache" data-toggle="tooltip" title="by Truffle" target="_blank">Ganache</a> </li>
+		  <li><a href="https://github.com/ConsenSys/Local-Raiden" data-toggle="tooltip" title="by Consensus" target="_blank">Raiden</a> </li>
+		  <li><a href="https://kaleido.io/" target="_blank">Kaleido</a></li>
+		</ul>
+  <p><a name="explorers"></a></p>
+  <h3>Block explorers</h3>
+		<ul>
+		  <li><a href="https://etherscan.io/" target="_blank">Etherscan</a></li>
+		  <li><a href="https://blockchair.com/ethereum" target="_blank">Blockchair</a></li>
+		  <li><a href="https://etherchain.org/" target="_blank">Etherchain</a></li>
+    </ul>
+    <p><a name="faucets"></a></p>
+    <h3>Test Eth faucets</h3>
+    <ul>
+				<li><a href="https://faucet.rinkeby.io" target="_blank">Rinkeby</a></li>
+        <li><a href="https://gitter.im/kovan-testnet/faucet" target="_blank">Kovan</a></li> 
+        <li><a href="https://faucet-sokol.herokuapp.com/" target="_blank">Sokol</a></li>    
+    </ul> 
+    <p><a name="wallets"></a></p> 
+    <h3>Wallets</h3>
+    <ul>
+				<li><a href="https://metamask.io/" target="_blank">Metamask</a> (browser wallet) <span class="badge badge-dark">⭐ recommended</span></li>
+        <li><a href="https://www.myetherwallet.com/" target="_blank">MyEtherWallet</a> (web wallet)</li> 
+        <li><a href="https://www.exodus.com/" target="_blank">Exodus</a> (PC wallet)</li> 
+        <li><a href="https://jaxx.io/" target="_blank">Jaxx</a> (mobile wallet)</li>    
+        <li><a href="https://shop.ledger.com/?r=2ebc" target="_blank">Ledger</a> (hardware wallet)</li> 
+    </ul>       
+   <p><a name="storage"></a></p>
+   <h3>Decentralized storage</h3>
+    <ul>
+      <li><a href="https://ipfs.io/docs/" target="_blank">IPFS</a></li>
+      <li><a href="http://swarm-gateways.net/" target="_blank">Swarm</a></li> 
+      <li><a href="https://github.com/orbitdb/orbit-db" target="_blank">Orbit</a></li>
+    </ul>
+  <p><a name="various"></a></p>
+   <h3>Various tools</h3>
+    <ul>
+      <li><a href="https://ethgasstation.info/" target="_blank">Eth Gas station</a> (gas price feed)</li>
+      <li><a href="https://ethgasnow.com/" target="_blank">Eth Gas now</a> (NFT mint price feed)</li> 
+      <li><a href="https://ethfiddle.com/" target="_blank">Eth Fiddle</a> (online editor)</li>
+      <li><a href="https://dappradar.com/rankings/" target="_blank">Dappradar</a> (explore Web3 Dapps)</li>
+    </ul>  
+    </div>
+  </div>
+</div>
+
+<div class="jumbotron text-center bottom" style="margin-bottom:0px;">
+  <p>Made with ❤ by <a href="https://www.twitter.com/fryingneurons">@fryingneurons</a>. Contribute on <a href="https://github.com/nickberns/howtoweb3.guide">github</a>. gm!</p>
+  Wand by <a href="https://springhole.net">springhole</a>. Sparkles by <a href="https://gist.github.com/averykhoo/8057a0324be445bd7eea32c89379eb76">averykhoo</a>.  Galaxy by <a href="https://codepen.io/sharmad/pen/fJdnt">sharmad</a>.
+</div>
+</div>
+</body>
+
+
+</html>
