@@ -135,13 +135,16 @@ h3 {
     margin: 10px 10px 10px 10px !important;
   }
   .heading-container .subheading {
-    margin-top: -20px;
+    margin-top: 20px;
     padding-top: 4px;
     text-align: center;
     padding-bottom: 20px;
   }
   .heading-container .subheading .title {
     font-size: 1.5rem;
+  }
+  .tagline {
+    font-size: 14px;
   }
 }
 
