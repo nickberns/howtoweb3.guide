@@ -148,8 +148,12 @@ h3 {
     font-size: 14px;
   }
   body {
-    background-color: '#03031A';
     background-image: none;
+    background-color: #03031a;
+  }
+  .heading-container {
+    background-image: none;
+    background-color: #03031a;
   }
 }
 
