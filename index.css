@@ -145,7 +145,8 @@ h3 {
     font-size: 1.5rem;
   }
   .tagline {
-    font-size: 14px;
+    padding-top: 10px;
+    font-size: 12px;
   }
   body {
     background-image: none;
@@ -154,6 +155,9 @@ h3 {
   .heading-container {
     background-image: none;
     background-color: #03031a;
+  }
+  .main {
+    margin-left: 5%;
   }
 }
 
