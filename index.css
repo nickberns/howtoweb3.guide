@@ -103,6 +103,7 @@ h3 {
   -moz-text-fill-color: transparent;
 }
 .main {
+  margin-top: 20px;
   margin-left: 25%;
   margin-right: 25%;
 }
@@ -139,7 +140,8 @@ h3 {
     margin-top: 20px;
     padding-top: 4px;
     text-align: center;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
+    margin-bottom: 0px;
   }
   .heading-container .subheading .title {
     font-size: 1.5rem;
@@ -157,6 +159,7 @@ h3 {
     background-color: #03031a;
   }
   .main {
+    margin-top: 10px;
     margin-left: 5%;
   }
   .logo {
