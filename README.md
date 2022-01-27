@@ -5,3 +5,9 @@
 Feel free to contribute to this list.
 
 Brought to you by <a href="https://twitter.com/fryingneurons">@fryingneurons</a>
+
+Support this project:
+
+BTC: 15dfeUMLxutHbnJAgWFNNGByp4vKUMeHWn
+ETH: 0xF2596d0388874e2638c671884b2c7073B41D4361
+
